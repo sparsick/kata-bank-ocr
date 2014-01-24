@@ -3,6 +3,11 @@ package kata.bank;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
@@ -13,14 +18,14 @@ public class KataBankTest {
     @Test
     public void testReadFile() {
         KataBank bank = new KataBank();
-        bank.parse(new String[]{getAccountNumberFile()});
+        bank.parse(getAccountNumberFile());
         assertNotNull(bank.content);
     }
 
     @Test(expected = KataBankException.class)
     public void testNoProgramArgument() {
         KataBank bank = new KataBank();
-        bank.parse(new String[]{});
+        bank.parse();
     }
 
     @Test
@@ -46,9 +51,9 @@ public class KataBankTest {
         KataBank bank = new KataBank();
         bank.parse(getAccountNumberFile());
 
-        assertThat(bank.accountNumbers, hasItems("000000000"));
+        assertThat(bank.accountNumbers, hasItems(new BankAccountNumber("000000000")));
         /* assertThat(bank.accountNumbers.size(), is(1)); */
-        assertThat(bank.accountNumbers.get(0), is("000000000"));
+        assertThat(bank.accountNumbers.get(0), is(new BankAccountNumber("000000000")));
     }
 
     @Test
@@ -56,11 +61,25 @@ public class KataBankTest {
         KataBank bank = new KataBank();
         bank.parse(getAccountNumberFile());
 
-        assertThat(bank.accountNumbers, hasItems("111111111"));
-        assertThat(bank.accountNumbers.get(1), is("111111111"));
+        assertThat(bank.accountNumbers, hasItems(new BankAccountNumber("111111111")));
+        assertThat(bank.accountNumbers.get(1), is(new BankAccountNumber("111111111")));
     }
 
     private String getAccountNumberFile() {
-        return System.getProperty("user.dir") + File.separator + "src/test/resources/AccountNumber.txt";
+        return System.getProperty("user.dir") + File.separator + "src/test/resources/lasttest.txt";
+    }
+
+    private String getOutputFilename() {
+        return System.getProperty("user.dir") + File.separator + "src/test/resources/AccountNumberOutput.txt";
+    }
+
+    @Test
+    public void testOutputLine() throws IOException {
+        KataBank bank = new KataBank();
+        bank.parse(getAccountNumberFile());
+        bank.writeToFile(getOutputFilename());
+        List<String> allLines = Files.readAllLines(Paths.get(getOutputFilename()), Charset.defaultCharset());
+        assertTrue(allLines.size() > 0);
+        assertThat(allLines.get(0), is("000000000"));
     }
 }
